@@ -4,19 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>humane.</title>
-    <!-- Fix for favicon 404 error -->
     <link rel="icon" href="data:,">
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- Fonts: Syne (Display), Inter (Body), VT323 (Tech/Raw) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
-    <!-- GSAP Libraries -->
+    <!-- GSAP & Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
-
-    <!-- Three.js Import Map -->
+    
     <script type="importmap">
         {
             "imports": {
@@ -26,12 +25,11 @@
         }
     </script>
 
-    <!-- Vertex Shader -->
+    <!-- Shaders for Three.js -->
     <script type="x-shader/x-vertex" id="vertexshader">
         attribute float size;
         attribute vec3 customColor;
         varying vec3 vColor;
-
         void main() {
             vColor = customColor;
             vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
@@ -40,12 +38,10 @@
         }
     </script>
 
-    <!-- Fragment Shader -->
     <script type="x-shader/x-fragment" id="fragmentshader">
         uniform vec3 color;
         uniform sampler2D pointTexture;
         varying vec3 vColor;
-
         void main() {
             gl_FragColor = vec4( color * vColor, 1.0 );
             gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
@@ -53,598 +49,435 @@
     </script>
 
     <style>
-        /* --- BRANDING OVERRIDES --- */
+        /* --- 2026 GEN Z / RED THEME VARS --- */
         :root {
-            --brand-font: 'Roboto', sans-serif;
-            --tech-font: 'Roboto', sans-serif; 
-            --brand-color: #ff0000;
-            --bg-color: #000000;
-            --text-main: #ffffff;
-            --text-dim: #888888;
-            --border-dim: #333333;
-            --border-bright: #ffffff;
-        }
-
-        /* --- MODERN CSS LAYOUT --- */
-        @layer reset, base, layout, components, sections, util;
-
-        @layer base {
-            html {
-                background: var(--bg-color);
-                font-family: var(--brand-font);
-                font-weight: 400;
-                color: var(--text-main);
-                scrollbar-width: none;
-                -ms-overflow-style: none;
-                overflow-x: hidden;
-            }
-            html::-webkit-scrollbar { display: none; }
-
-            body {
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                overflow-x: hidden;
-            }
-
-            h1, h2, h3, h4, p, a, span {
-                -webkit-font-smoothing: antialiased;
-            }
-
-            h1, h2, h3, h4, .section-title {
-                font-family: var(--brand-font);
-                font-weight: 500;
-                letter-spacing: -0.02em;
-                margin: 0;
-            }
-
-            h1 {
-                font-weight: 700;
-                letter-spacing: -0.04em;
-                text-transform: uppercase;
-            }
-
-            p {
-                color: var(--text-dim);
-                line-height: 1.5;
-            }
-
-            /* --- STATIC BLACK BACKGROUND --- */
-            .abstract-bg {
-                position: fixed;
-                inset: 0;
-                z-index: -1;
-                background: #000000;
-                overflow: hidden;
-                pointer-events: none;
-            }
-        }
-
-        @layer layout {
-            section { padding: 4rem 1.5rem; position: relative; }
-            @media(min-width: 930px) { section { padding: 8rem 4rem; } }
-            .container { max-width: 1400px; margin: 0 auto; width: 100%; }
-        }
-
-        @layer components {
-            .header-wrapper {
-                position: fixed; top: 0; left: 0; right: 0;
-                background: rgba(0,0,0,0.01); backdrop-filter: blur(5px);
-                border-bottom: 1px solid rgba(255,255,255,0.03); z-index: 1000;
-            }
+            --c-bg: #FF3333;      /* Primary Alert Red */
+            --c-ink: #050505;     /* Deep Black */
+            --c-paper: #FFFFFF;   /* Stark White accents */
             
-            header {
-                display: flex; justify-content: space-between; align-items: center;
-                height: 70px; padding: 0 1.5rem; max-width: 1400px; margin: 0 auto;
-            }
+            --f-disp: 'Syne', sans-serif;
+            --f-body: 'Inter', sans-serif;
+            --f-mono: 'VT323', monospace;
 
-            .brand-logo {
-                font-family: var(--brand-font); font-weight: 700; font-size: 1.2rem;
-                color: var(--text-main); text-decoration: none;
-                letter-spacing: -0.05em; text-transform: lowercase;
-            }
-            .brand-logo span { color: var(--brand-color); }
-
-            nav.inline-nav { display: none; }
-
-            .menu-toggle {
-                display: block; color: white; cursor: pointer; background: none;
-                border: none; padding: 0; font-size: 1.5rem; z-index: 2001;
-            }
-
-            .menu-overlay {
-                position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-                backdrop-filter: blur(20px); z-index: 2000;
-                display: flex; flex-direction: column; justify-content: center; align-items: center;
-                opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-            }
-            .menu-overlay.active { opacity: 1; pointer-events: all; }
-            .menu-overlay ul { list-style: none; padding: 0; margin: 0; text-align: center; display: flex; flex-direction: column; gap: 2rem; }
-            .menu-overlay a {
-                color: var(--text-main); text-decoration: none; font-size: 2rem;
-                font-weight: 300; text-transform: uppercase; letter-spacing: 0.05em;
-                transition: color 0.3s, letter-spacing 0.3s; display: block;
-            }
-            @media(min-width: 930px) { .menu-overlay a { font-size: 2.5rem; } }
-            .menu-overlay a:hover { color: var(--brand-color); letter-spacing: 0.1em; }
-            .menu-overlay .close-btn {
-                position: absolute; top: 20px; right: 20px; color: var(--text-dim);
-                cursor: pointer; font-size: 2rem; background: none; border: none;
-            }
-            @media(min-width: 930px) { .menu-overlay .close-btn { right: 4rem; top: 1.5rem; } header { padding: 0 4rem; } }
-
-            .btn-primary {
-                background: var(--text-main); color: var(--bg-color); border: none;
-                padding: 0.8rem 1.8rem; font-family: var(--brand-font); font-weight: 500;
-                text-transform: uppercase; font-size: 0.85rem; cursor: pointer;
-                border-radius: 999px; transition: transform 0.2s, background 0.2s;
-                display: inline-flex; align-items: center; gap: 0.5rem;
-                text-decoration: none; /* Added for anchor tag usage */
-            }
-            .btn-primary:hover { background: var(--brand-color); color: var(--text-main); transform: translateY(-2px); }
-
-            .btn-secondary {
-                background: transparent; border: 1px solid var(--border-dim);
-                color: var(--text-main); padding: 0.8rem 1.8rem;
-                font-family: var(--brand-font); font-weight: 500;
-                text-transform: uppercase; font-size: 0.85rem; cursor: pointer;
-                border-radius: 999px; transition: border-color 0.2s;
-            }
-            .btn-secondary:hover { border-color: var(--text-main); }
+            --border-ink: 2px solid var(--c-ink);
+            --border-thin: 1px solid rgba(0,0,0,0.2);
         }
 
-        @layer sections {
-            /* --- HERO --- */
-            #welcome {
-                min-height: 100vh;
-                display: flex; flex-direction: column; justify-content: center; align-items: center;
-                text-align: center;
-                /* Padding to accommodate header */
-                padding-top: 70px;
-                background: transparent;
-                position: relative;
-            }
+        /* --- BASE STYLES --- */
+        *, *::before, *::after { box-sizing: border-box; cursor: crosshair; }
 
-            /* Container for the 3D Text */
-            #magic {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 1; /* Below text content if we had any, but we are replacing text */
-                pointer-events: all; /* Needs pointer events for mouse interaction */
-            }
-
-            /* Hiding original H1 as 3D text replaces it */
-            #welcome h1 {
-                display: none;
-            }
-
-            #welcome p {
-                font-family: var(--brand-font); letter-spacing: 0.1em;
-                text-transform: uppercase; margin-top: 250px; /* Push down below 3D text area */
-                margin-bottom: 3rem; color: var(--brand-color); font-size: 0.9rem; font-weight: 500;
-                position: relative; z-index: 2;
-                pointer-events: none; /* Let clicks pass through to particles */
-            }
-
-            .hero-cta {
-                display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
-                position: relative; z-index: 2;
-            }
-
-            /* --- VIDEO --- */
-            #video {
-                padding: 0; border-top: 1px solid var(--border-dim);
-                border-bottom: 1px solid var(--border-dim); background: rgba(0,0,0,0.5);
-                overflow: hidden;
-            }
-            #video video {
-                width: 100%;
-                height: auto; /* Changed from 100% to auto to prevent zooming/cropping */
-                max-height: 90vh; /* Ensure it fits on screen */
-                display: block;
-                margin: 0 auto; /* Center video */
-                filter: grayscale(100%) contrast(1.1); transition: filter 0.5s;
-                pointer-events: none; /* Prevents interaction, making it act like an image */
-            }
-            #video:hover video { filter: grayscale(0%); }
-
-            /* --- EVOLUTION --- */
-            #story { background: transparent; }
-            .section-header {
-                border-bottom: 1px solid var(--border-dim); padding-bottom: 2rem; margin-bottom: 4rem;
-                display: flex; justify-content: space-between; align-items: flex-end;
-            }
-            .section-header h2 { font-size: clamp(2rem, 8vw, 3rem); text-transform: uppercase; font-weight: 500; }
-            .section-header .mono-label { 
-                font-family: var(--tech-font); color: var(--brand-color); 
-                font-size: 0.8rem; letter-spacing: 0.1em; font-weight: 500;
-            }
-            .story-grid { display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--border-dim); }
-            @media(min-width: 930px) { .story-grid { grid-template-columns: repeat(3, 1fr); border-top: none; } }
-            .story-card {
-                padding: 3rem 2rem; border-bottom: 1px solid var(--border-dim);
-                border-right: 1px solid transparent; transition: background 0.3s;
-                height: 100%; display: flex; flex-direction: column; justify-content: space-between;
-                min-height: 250px; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
-            }
-            @media(min-width: 930px) {
-                .story-card { border-right: 1px solid var(--border-dim); border-bottom: 1px solid var(--border-dim); min-height: 300px; }
-                .story-card:last-child { border-right: none; }
-            }
-            .story-card:hover { background: rgba(255,255,255,0.05); }
-            .story-card:hover h3 { color: var(--brand-color); }
-            .epoch-label { font-family: var(--tech-font); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem; display: block; font-weight: 500; }
-            .story-card h3 { font-size: 1.75rem; margin-bottom: 1.5rem; transition: color 0.3s; font-weight: 500; }
-            @media(min-width: 930px) { .story-card h3 { font-size: 2rem; } }
-
-            /* --- TRAP --- */
-            #trap { background: transparent; }
-            .trap-grid { display: grid; grid-template-columns: 1fr; gap: 0; border: 1px solid var(--border-dim); background: rgba(0,0,0,0.6); }
-            @media(min-width: 930px) { .trap-grid { grid-template-columns: 1fr 1fr; } }
-            .trap-card { padding: 2.5rem; border-bottom: 1px solid var(--border-dim); display: flex; flex-direction: column; gap: 2rem; position: relative; }
-            @media(min-width: 930px) { .trap-card { padding: 3rem; border-bottom: none; border-right: 1px solid var(--border-dim); } .trap-card:last-child { border-right: none; } }
-            .trap-visual {
-                height: 150px; width: 100%; background: repeating-linear-gradient(45deg, #111, #111 10px, #000 10px, #000 20px);
-                border: 1px solid var(--border-dim); display: flex; align-items: center; justify-content: center; overflow: hidden;
-            }
-            .infinite-scroll-line { width: 2px; height: 100%; background: var(--brand-color); box-shadow: 0 0 20px var(--brand-color); }
-            .slot-machine-dots { display: flex; gap: 10px; }
-            .dot { width: 12px; height: 12px; background: #333; border-radius: 50%; }
-            .dot.active { background: var(--brand-color); box-shadow: 0 0 10px var(--brand-color); }
-            .trap-content h3 { font-family: var(--brand-font); font-size: 1.5rem; color: var(--text-main); margin-bottom: 1rem; text-transform: uppercase; font-weight: 500; }
-            .trap-number { color: var(--brand-color); font-family: var(--tech-font); font-size: 0.8rem; letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem; }
-
-            /* --- PRODUCT --- */
-            #product { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; border-top: 1px solid var(--border-dim); background: rgba(0,0,0,0.4); }
-            #product h2 { max-width: 900px; text-align: center; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.2; font-family: var(--brand-font); font-weight: 500; }
-            .gs-typewriter { color: var(--text-dim); }
-            .floating-buttons-container { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-top: 5rem; }
-            .float-btn {
-                width: 70px; height: 70px; border: 1px solid var(--border-dim); border-radius: 50%; background: rgba(0,0,0,0.5); color: var(--text-dim);
-                display: grid; place-items: center; transition: all 0.3s; position: relative;
-            }
-            @media(min-width: 930px) { .float-btn { width: 80px; height: 80px; } }
-            .float-btn::after { content: ''; position: absolute; inset: -4px; border: 1px solid transparent; border-radius: 50%; transition: border-color 0.3s; }
-            .float-btn:hover { border-color: var(--text-main); color: var(--brand-color); background: rgba(255,255,255,0.05); }
-            .float-btn:hover::after { border-color: var(--brand-color); }
-
-            /* --- DEVICES --- */
-            #devices { padding: 6rem 1.5rem; display: flex; flex-direction: column; align-items: center; border-top: 1px solid var(--border-dim); background: transparent; position: relative; z-index: 1; }
-            #devices .section-title { font-size: 3rem; margin-bottom: 6rem; color: var(--text-main); text-align: center; text-transform: uppercase; letter-spacing: -0.02em; font-weight: 500; }
-            .showcase-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 8rem; }
-            .feature-row { display: flex; flex-direction: column; align-items: center; gap: 4rem; }
-            @media(min-width: 930px) { .feature-row { flex-direction: row; gap: 8rem; justify-content: center; } .feature-row:nth-child(even) { flex-direction: row-reverse; } }
-            .phone-frame {
-                width: 100%; max-width: 300px; aspect-ratio: 9/19.5; height: auto; background: #000; border-radius: 40px; border: 2px solid #333; position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 0 10px #111; transition: border-color 0.4s;
-            }
-            @media(min-width: 930px) { .phone-frame { width: 300px; height: auto; aspect-ratio: 9/19.5; max-width: none; } }
-            .feature-row:hover .phone-frame { border-color: var(--brand-color); }
-            .phone-screen { width: 100%; height: 100%; background: #050505; display: flex; align-items: center; justify-content: center; color: #333; font-family: var(--tech-font); font-size: 0.8rem; letter-spacing: 0.2em; position: relative; }
-            .phone-screen::before { content: ''; width: 60%; height: 2px; background: #333; position: absolute; top: 20%; }
-            .phone-screen::after { content: ''; width: 40%; height: 2px; background: #333; position: absolute; bottom: 20%; }
-            .feature-text { max-width: 450px; text-align: center; }
-            @media(min-width: 930px) { .feature-text { text-align: left; } }
-            .feature-text h3 { font-size: 2.5rem; margin-bottom: 1.5rem; color: var(--text-main); font-family: var(--brand-font); font-weight: 500; }
-            .feature-text p { font-size: 1.1rem; color: var(--text-dim); line-height: 1.6; }
-
-            /* --- DEVELOPERS --- */
-            #developers { padding: 8rem 1.5rem; text-align: center; border-top: 1px solid var(--border-dim); background: rgba(0,0,0,0.8); }
-            #developers h2 { font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: 500; }
-            #developers p { max-width: 600px; margin: 0 auto; font-size: 1.2rem; }
-
-            /* --- DOWNLOAD / FOOTER --- */
-            #beforeyougo { 
-                min-height: 80vh; 
-                display: flex; 
-                flex-direction: column; 
-                justify-content: center; 
-                align-items: center; 
-                border-top: 1px solid var(--border-dim); 
-                text-align: center; 
-                position: relative; 
-                background: rgba(0,0,0,0.6); 
-                overflow: hidden; /* Added to clip the zoomed frame */
-            }
-            #beforeyougo p { 
-                font-size: clamp(2rem, 5vw, 4rem); 
-                font-weight: 700; 
-                color: var(--text-main); 
-                margin-bottom: 3rem; 
-                text-transform: uppercase; 
-                letter-spacing: -0.02em; 
-                position: relative; z-index: 2; /* Ensure text is on top */
-            }
-            #beforeyougo p span { color: var(--brand-color); }
-            
-            .bg-frame {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) scale(1.8) rotate(-15deg);
-                width: 300px;
-                aspect-ratio: 9/19.5;
-                background: #000;
-                border-radius: 40px;
-                border: 2px solid #333;
-                box-shadow: 0 0 0 10px #111;
-                z-index: 1;
-                opacity: 0.15;
-                pointer-events: none;
-                overflow: hidden;
-            }
-            
-            .bg-frame img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                filter: grayscale(100%); /* Make it blend better */
-            }
-
-            .big-download-btn {
-                position: relative; z-index: 2; /* Ensure button is on top */
-                background: var(--text-main); color: var(--bg-color); font-size: 1.1rem; padding: 1rem 2.5rem; border: none; font-family: var(--brand-font); font-weight: 500; text-transform: uppercase; cursor: pointer; border-radius: 999px; transition: transform 0.2s, background 0.2s, color 0.2s; display: inline-flex; align-items: center; gap: 0.8rem;
-                text-decoration: none; /* Added for anchor tag usage */
-            }
-            .big-download-btn:hover { transform: scale(1.05); background: #3DDC84; color: #000000; }
-            .footer-credit { 
-                position: absolute; bottom: 2rem; font-family: var(--brand-font); font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.1em; opacity: 0.5; 
-                z-index: 2;
-            }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            margin: 0;
+            background-color: var(--c-bg);
+            color: var(--c-ink);
+            font-family: var(--f-body);
+            overflow-x: hidden;
+            /* Subtle Grain Texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
         }
+
+        h1, h2, h3, h4 { margin: 0; font-family: var(--f-disp); text-transform: uppercase; line-height: 0.9; }
+        p { line-height: 1.4; font-size: 1.1rem; }
+        a { color: inherit; text-decoration: none; }
+
+        /* --- UTILS --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+        .mono { font-family: var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; }
+        
+        /* Marquee */
+        .marquee {
+            background: var(--c-ink);
+            color: var(--c-bg);
+            padding: 0.5rem 0;
+            overflow: hidden;
+            white-space: nowrap;
+            font-family: var(--f-mono);
+            font-size: 1.2rem;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+        }
+        .marquee-inner { display: inline-block; animation: scroll 20s linear infinite; }
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 40px;
+            left: 0; right: 0;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 900;
+            mix-blend-mode: normal; 
+        }
+
+        .logo { font-size: 2rem; font-weight: 800; letter-spacing: -0.05em; }
+        
+        .pill-badge {
+            border: var(--border-ink);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-family: var(--f-mono);
+            font-weight: bold;
+            background: transparent;
+            transition: 0.3s;
+        }
+        .pill-badge:hover { background: var(--c-ink); color: var(--c-bg); }
+
+        /* --- HERO --- */
+        #hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #magic {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-overlay {
+            position: relative;
+            z-index: 2;
+            pointer-events: none; /* Let clicks pass to three.js */
+            text-align: center;
+            width: 100%;
+        }
+
+        /* --- APP INTRO / SHOWCASE --- */
+        #showcase {
+            padding: 8rem 0;
+            background: var(--c-bg);
+            border-top: var(--border-ink);
+        }
+
+        .section-header {
+            font-size: clamp(3rem, 10vw, 8rem);
+            margin-bottom: 4rem;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .showcase-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            align-items: center;
+            border-bottom: var(--border-ink);
+            padding-bottom: 4rem;
+        }
+        
+        @media (min-width: 900px) {
+            .feature-block { grid-template-columns: 1fr 1fr; gap: 4rem; }
+            .feature-block:nth-child(even) { direction: rtl; }
+            .feature-block:nth-child(even) .feature-text { direction: ltr; }
+        }
+
+        .phone-mock {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 9/19.5;
+            background: #000;
+            border-radius: 40px;
+            border: 3px solid #000;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 20px 20px 0px rgba(0,0,0,0.1);
+            transition: transform 0.4s ease;
+        }
+        
+        .phone-mock:hover { transform: scale(1.02) rotate(-1deg); }
+
+        .phone-mock img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .feature-text h3 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            color: var(--c-ink);
+        }
+        
+        .feature-text p {
+            font-family: var(--f-mono);
+            font-size: 1.2rem;
+            max-width: 400px;
+        }
+
+        /* --- DIAGNOSTICS (Simplified) --- */
+        #diagnostics {
+            background: var(--c-ink);
+            color: var(--c-bg);
+            padding: 6rem 2rem;
+            font-family: var(--f-mono);
+        }
+        
+        .diag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .diag-item {
+            border: 1px solid var(--c-bg);
+            padding: 2rem;
+        }
+        .diag-item h4 { font-size: 2rem; margin-bottom: 1rem; }
+
+        /* --- VIDEO --- */
+        #video-section {
+            background: var(--c-bg);
+            padding: 4rem 2rem;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: var(--border-ink);
+            position: relative;
+            background: #000;
+        }
+
+        video {
+            display: block;
+            width: 100%;
+            /* TINT EFFECT: Multiply blend mode acts as a red filter */
+            mix-blend-mode: luminosity; 
+            opacity: 0.8;
+        }
+        
+        /* Red Overlay to colorize the grayscale video */
+        .video-tint {
+            position: absolute;
+            inset: 0;
+            background: var(--c-bg);
+            mix-blend-mode: multiply;
+            pointer-events: none;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: var(--border-ink);
+            padding: 2rem;
+        }
+
+        .mega-text {
+            font-size: clamp(4rem, 18vw, 15rem);
+            font-weight: 800;
+            line-height: 0.8;
+            letter-spacing: -0.04em;
+        }
+
+        .download-btn {
+            margin-top: 3rem;
+            background: var(--c-ink);
+            color: var(--c-bg);
+            padding: 1.5rem 4rem;
+            font-family: var(--f-mono);
+            font-size: 1.5rem;
+            border-radius: 999px;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .download-btn:hover { transform: scale(1.05); }
+
+        /* Stickers */
+        .sticker {
+            position: absolute;
+            background: var(--c-paper);
+            color: var(--c-ink);
+            padding: 0.5rem 1rem;
+            font-family: var(--f-mono);
+            font-weight: bold;
+            border: 2px solid var(--c-ink);
+            transform: rotate(-10deg);
+            box-shadow: 4px 4px 0px var(--c-ink);
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- UTILITIES -->
-    <!-- Static Black Background -->
-    <div class="abstract-bg"></div>
-
-    <!-- Navigation Overlay -->
-    <div class="menu-overlay" id="menuOverlay">
-        <button class="close-btn material-symbols-outlined" id="closeMenuBtn" type="button">close</button>
-        <ul>
-            <li><a href="#welcome" class="nav-link">Home</a></li>
-            <li><a href="#story" class="nav-link">Manifesto</a></li>
-            <li><a href="#trap" class="nav-link">Diagnostics</a></li>
-            <li><a href="#devices" class="nav-link">Interface</a></li>
-        </ul>
+    <!-- MARQUEE -->
+    <div class="marquee">
+        <div class="marquee-inner">
+            /// SYSTEM REWIRED /// NO ALGORITHMS /// NO LIKES /// PURE VOICE /// NO CLOUD /// GHOST MODE ACTIVE /// SYSTEM REWIRED /// NO ALGORITHMS /// NO LIKES /// PURE VOICE ///
+        </div>
     </div>
 
-    <div class="header-wrapper">
-        <header>
-            <a href="#" class="brand-logo">humane<span>.</span></a>
-            <button class="menu-toggle material-symbols-outlined" id="menuToggleBtn" type="button">more_vert</button>
-        </header>
-    </div>
+    <!-- NAV -->
+    <nav>
+        <a href="#" class="logo">humane.</a>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <span class="mono" style="display: none; @media(min-width:600px){display:inline;}">DOPAMINE: <span id="score">0</span>%</span>
+            <a href="https://github.com/red-humane/talk-to-me/releases/download/version-1.0.0/Talk-to-me.apk" class="pill-badge">GET APP</a>
+        </div>
+    </nav>
 
     <!-- HERO -->
-    <section id="welcome">
+    <section id="hero">
+        <div id="magic"></div>
+        
+        <!-- Absolute positioned stickers for Gen Z chaotic feel -->
+        <div class="sticker" style="top: 20%; left: 10%; transform: rotate(15deg);">v1.0.0_STABLE</div>
+        <div class="sticker" style="bottom: 20%; right: 10%; background: var(--c-ink); color: var(--c-bg);">DISCONNECT</div>
+    </section>
+
+    <!-- APP SHOWCASE (Replaces Evolution) -->
+    <section id="showcase">
+        <h2 class="section-header">THE INTERFACE<br>IS <span style="text-decoration: underline;">SILENT</span>.</h2>
+        
+        <div class="showcase-grid">
+            
+            <!-- Feature 1 -->
+            <div class="feature-block">
+                <div class="phone-mock">
+                    <img src="https://i.postimg.cc/zX7164QS/frame-1.png" alt="Gesture UI">
+                </div>
+                <div class="feature-text">
+                    <span class="mono">01 // GESTURE_CONTROL</span>
+                    <h3>MINIMAL<br>INPUT</h3>
+                    <p>No buttons. No distractions. A pure black canvas designed to respect your attention span.</p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-block">
+                <div class="phone-mock">
+                    <img src="https://i.postimg.cc/sDmRqbLW/frame-2.png" alt="Privacy">
+                </div>
+                <div class="feature-text">
+                    <span class="mono">02 // GHOST_PROTOCOL</span>
+                    <h3>ZERO<br>TRACE</h3>
+                    <p>No login required. No cloud storage. Messages self-destruct in 3 minutes. You were never here.</p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-block">
+                <div class="phone-mock">
+                    <img src="https://i.postimg.cc/ZKHh2XQr/frame-3.png" alt="Voice Chat">
+                </div>
+                <div class="feature-text">
+                    <span class="mono">03 // HUMAN_CONN</span>
+                    <h3>REAL<br>VOICE</h3>
+                    <p>Speak naturally. Text is secondary. Reclaiming the nuance of human emotion through audio.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- DIAGNOSTICS (Minimal) -->
+    <section id="diagnostics">
         <div class="container">
-            <!-- 3D Text Container -->
-            <div id="magic"></div>
-            
-            <!-- Hidden original H1 -->
-            <h1>Talk to me<span>.</span></h1>
-            
-            <p>The post-screen era begins now.</p>
-            <div class="hero-cta">
-                <a href="https://github.com/red-humane/talk-to-me/releases/download/version-1.0.0/Talk-to-me.apk" class="btn-primary"><span class="material-symbols-outlined">android</span> Android</a>
-                <button class="btn-secondary" type="button" onclick="document.getElementById('story').scrollIntoView({behavior: 'smooth'})">Read Manifesto</button>
+            <h2 style="margin-bottom: 3rem; border-bottom: 1px solid var(--c-bg); padding-bottom: 1rem;">REALITY_CHECK</h2>
+            <div class="diag-grid">
+                <div class="diag-item">
+                    <h4>INFINITE_SCROLL</h4>
+                    <p>>> STATUS: BLOCKED</p>
+                    <p>>> Doomscrolling algorithms removed. End of content reached.</p>
+                </div>
+                <div class="diag-item">
+                    <h4>METRICS</h4>
+                    <p>>> STATUS: NULL</p>
+                    <p>>> No like counts. No view counts. No social validation loops.</p>
+                </div>
+                <div class="diag-item">
+                    <h4>ADS</h4>
+                    <p>>> STATUS: PURGED</p>
+                    <p>>> You are not the product. You are the user.</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- VIDEO -->
-    <section id="video">
-        <!-- Removed muted and loop, modified styles for full visibility -->
-        <video id="promoVideo" width="100%" playsinline style="width: 100%; height: auto; max-height: 90vh; display: block; margin: 0 auto;">
-            <source src="https://github.com/red-humane/humane-intro/raw/refs/heads/main/Duration_8_seconds_202601212249_ev4ux.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </section>
-
-    <!-- EVOLUTION -->
-    <section id="story">
-        <div class="container">
-            <div class="section-header">
-                <h2>Evolution</h2>
-                <span class="mono-label">HUMAN_HISTORY_LOG_v1.0</span>
-            </div>
-
-            <div class="story-grid">
-                <div class="story-card">
-                    <div>
-                        <span class="epoch-label">EPOCH_01</span>
-                        <h3>The Hunter</h3>
-                    </div>
-                    <p>Alert. Focused. Purposeful. We evolved to chase sustenance, not dopamine. Connected to reality.</p>
-                </div>
-                <div class="story-card">
-                    <div>
-                        <span class="epoch-label">EPOCH_02</span>
-                        <h3>The Builder</h3>
-                    </div>
-                    <p>Constructive. Logical. Productive. Tools served us. We amplified our capability to master the environment.</p>
-                </div>
-                <div class="story-card" style="border-right: none;">
-                    <div>
-                        <span class="epoch-label" style="color:var(--brand-color)">EPOCH_03 // CRITICAL</span>
-                        <h3>The Addict</h3>
-                    </div>
-                    <p>Passive. Numb. Consumed. A cage of glass and light. Connection traded for sanitized approval signals.</p>
-                </div>
+    <section id="video-section">
+        <div class="video-container">
+            <video autoplay muted loop playsinline>
+                <source src="https://github.com/red-humane/humane-intro/raw/refs/heads/main/Duration_8_seconds_202601212249_ev4ux.mp4" type="video/mp4">
+            </video>
+            <div class="video-tint"></div>
+            <div style="position: absolute; top: 20px; left: 20px; color: white; font-family: var(--f-mono); z-index: 5;">
+                REC ● [LIVE_FEED]
             </div>
         </div>
     </section>
 
-    <!-- THE TRAP -->
-    <section id="trap">
-        <div class="container">
-            <div class="section-header" style="border-color: #333;">
-                <h2>Current Scenario</h2>
-                <span class="mono-label" style="color:var(--brand-color)">REALITY_DIAGNOSTICS</span>
-            </div>
+    <!-- FOOTER -->
+    <footer>
+        <p class="mono">AVAILABLE NOW ON ANDROID</p>
+        <div class="mega-text">TALK<br>TO ME.</div>
+        
+        <a href="https://github.com/red-humane/talk-to-me/releases/download/version-1.0.0/Talk-to-me.apk" class="download-btn">
+            <span class="material-symbols-outlined">android</span>
+            INSTALL APK
+        </a>
 
-            <div class="trap-grid">
-                <div class="trap-card">
-                    <span class="trap-number">01 // INFINITE_LOOP</span>
-                    <div class="trap-content">
-                        <h3>The Feed</h3>
-                        <p>Traditional media had stopping cues. The feed is designed to be bottomless, automating consumption.</p>
-                    </div>
-                    <div class="trap-visual">
-                        <div class="infinite-scroll-line animate-scroll-vertical"></div>
-                    </div>
-                </div>
-                <div class="trap-card">
-                    <span class="trap-number">02 // VARIABLE_REWARD</span>
-                    <div class="trap-content">
-                        <h3>The Gamble</h3>
-                        <p>Apps are engineered like slot machines. The uncertainty creates a dopamine spike stronger than the reward.</p>
-                    </div>
-                    <div class="trap-visual">
-                        <div class="slot-machine-dots">
-                            <div class="dot active"></div><div class="dot"></div><div class="dot active"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="mono" style="margin-top: 4rem; opacity: 0.6; font-size: 0.9rem;">
+            © 2026 HUMANE CORP // NO RIGHTS RESERVED
         </div>
-    </section>
-
-    <!-- PRODUCT TAGLINE -->
-    <section id="product">
-        <div class="container" style="display:flex; flex-direction:column; align-items:center;">
-            <h2><span class="typewriter gs-typewriter">Make humans think again. Reshape the world. Evolution is in our hands.</span></h2>
-            <div class="floating-buttons-container">
-                <button class="float-btn" type="button"><span class="material-symbols-outlined">mic</span></button>
-                <button class="float-btn" type="button"><span class="material-symbols-outlined">graphic_eq</span></button>
-                <button class="float-btn" type="button"><span class="material-symbols-outlined">fingerprint</span></button>
-                <button class="float-btn" type="button"><span class="material-symbols-outlined">globe</span></button>
-                <button class="float-btn" type="button"><span class="material-symbols-outlined">chat_bubble</span></button>
-            </div>
-        </div>
-    </section>
-
-    <!-- DEVICES -->
-    <section id="devices">
-        <h2 class="section-title">The Interface</h2>
-        <div class="showcase-container">
-            <div class="feature-row">
-                <div class="phone-frame">
-                    <img src="https://i.postimg.cc/zX7164QS/frame-1.png" alt="Gesture UI Interface" style="width:100%; height:100%; object-fit:cover; display:block;">
-                </div>
-                <div class="feature-text">
-                    <h3>Minimal UI</h3>
-                    <p>Experience a new way to interact. No more distractive elements. Just chat and discuss about some topics with real-time users.</p>
-                </div>
-            </div>
-            <div class="feature-row">
-                <div class="phone-frame">
-                    <img src="https://i.postimg.cc/sDmRqbLW/frame-2.png" alt="Data Stream Interface" style="width:100%; height:100%; object-fit:cover; display:block;">
-                </div>
-                <div class="feature-text">
-                    <h3>Privacy focused</h3>
-                    <p>No login. No username. No data storage. Just text and it will be private as no one can track it. No cloud storage and your messages will be deleted after 3 minutes.</p>
-                </div>
-            </div>
-            <div class="feature-row">
-                <div class="phone-frame">
-                    <img src="https://i.postimg.cc/ZKHh2XQr/frame-3.png" alt="Voice Command Interface" style="width:100%; height:100%; object-fit:cover; display:block;">
-                </div>
-                <div class="feature-text">
-                    <h3>Speak with real users</h3>
-                    <p>Speak naturally. Go connect with the real users and chat, discuss and stop your loneliness.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- DEVELOPERS -->
-    <section id="developers">
-        <div class="container">
-            <h2>Built for humans.</h2>
-            <p class="intro">Restoring trust. Breaking addiction. Rewiring the brain to think freely.</p>
-        </div>
-    </section>
-
-    <!-- DOWNLOAD -->
-    <section id="beforeyougo">
-        <div class="bg-frame">
-            <img src="https://i.postimg.cc/1tR98Pbt/frame-4.png" alt="Background Interface">
-        </div>
-        <p>Talk to me<span>.</span></p>
-        <a href="https://github.com/red-humane/talk-to-me/releases/download/version-1.0.0/Talk-to-me.apk" class="big-download-btn"><span class="material-symbols-outlined" style="font-size: 1.4rem;">android</span> Android</a>
-        <footer class="footer-credit">
-            © 2026 HUMANE CORP.
-        </footer>
-    </section>
+    </footer>
 
     <script type="module">
         import * as THREE from 'three';
         import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
-        // --- VIDEO AUTOPLAY LOGIC ---
-        const video = document.getElementById('promoVideo');
-        
-        // Helper to unlock audio on first user interaction if browser blocked it
-        const unlockAudio = () => {
-            if (video && !video.paused && video.muted) {
-                video.muted = false;
-                video.volume = 1.0;
-            }
-            // Clean up listeners
-            window.removeEventListener('click', unlockAudio);
-            window.removeEventListener('touchstart', unlockAudio);
-            window.removeEventListener('keydown', unlockAudio);
-        };
-
-        // Listen for any interaction to potentially enable audio
-        window.addEventListener('click', unlockAudio);
-        window.addEventListener('touchstart', unlockAudio);
-        window.addEventListener('keydown', unlockAudio);
-
-        ScrollTrigger.create({
-            trigger: "#video",
-            start: "top 75%",
-            onEnter: () => {
-                video.currentTime = 0;
-                video.muted = false; // Try unmuted first
-                video.volume = 1.0;
-                
-                video.play().catch(() => {
-                    // Browser blocked unmuted autoplay
-                    console.log("Browser blocked unmuted autoplay. Fallback to muted.");
-                    video.muted = true;
-                    video.play();
-                    // Audio will unlock on next user interaction via unlockAudio()
-                });
-            },
-            once: true
-        });
-
-        // --- PARTICLE EFFECT LOGIC ---
+        // --- THREE.JS SETUP ---
         const preload = () => {
             let manager = new THREE.LoadingManager();
             manager.onLoad = function() { 
                 const environment = new Environment( typo, particle );
             }
-
             var typo = null;
             const loader = new FontLoader( manager );
             const fontUrl = 'https://res.cloudinary.com/dydre7amr/raw/upload/v1612950355/font_zsd4dr.json';
             const particleUrl = 'https://res.cloudinary.com/dfvtkoboz/image/upload/v1605013866/particle_a64uzf.png';
-
             loader.load(fontUrl, function ( font ) { typo = font; });
             const particle = new THREE.TextureLoader( manager ).load( particleUrl );
         }
 
-        if ( document.readyState === "complete" || (document.readyState !== "loading" && !document.documentElement.doScroll))
-            preload ();
-        else
-            document.addEventListener("DOMContentLoaded", preload ); 
+        if ( document.readyState === "complete" || (document.readyState !== "loading" && !document.documentElement.doScroll)) preload();
+        else document.addEventListener("DOMContentLoaded", preload ); 
 
         class Environment {
             constructor( font, particle ){ 
@@ -677,10 +510,9 @@
             }
 
             createRenderer() {
-                this.renderer = new THREE.WebGLRenderer({ alpha: true }); // Alpha true for transparent background
+                this.renderer = new THREE.WebGLRenderer({ alpha: true });
                 this.renderer.setSize( this.container.clientWidth, this.container.clientHeight );
                 this.renderer.setPixelRatio( Math.min( window.devicePixelRatio, 2));
-                this.renderer.outputColorSpace = THREE.SRGBColorSpace; // Modern replacement for outputEncoding
                 this.container.appendChild( this.renderer.domElement );
                 this.renderer.setAnimationLoop(() => { this.render() })
             }
@@ -699,68 +531,44 @@
                 this.particleImg = particleImg;
                 this.camera = camera;
                 this.renderer = renderer;
-                
                 this.raycaster = new THREE.Raycaster();
                 this.mouse = new THREE.Vector2(-200, 200);
-                
                 this.colorChange = new THREE.Color();
                 this.buttom = false;
-
-                // Mobile detection for optimization
-                const isMobile = window.innerWidth < 768;
-
                 this.data = {
-                    text: 'TALK TO ME',
-                    amount: isMobile ? 800 : 1500, // Reduce particles on mobile for performance
+                    text: 'TALK\nTO ME',
+                    amount: 1000,
                     particleSize: 1,
-                    particleColor: 0xffffff,
-                    textSize: isMobile ? 7 : 12, // Smaller text for mobile screens
-                    area: isMobile ? 80 : 150, // Smaller interaction area on mobile
+                    particleColor: 0x000000, // CHANGED TO BLACK
+                    textSize: 10,
+                    area: 100,
                     ease: .05,
                 }
-
                 this.setup();
                 this.bindEvents();
             }
 
             setup(){
-                let w = this.visibleWidthAtZDepth( 100, this.camera );
-                let h = this.visibleHeightAtZDepth( 100, this.camera );
-                // Fallback to prevent NaN error if camera/container isn't fully ready
-                if (isNaN(w) || w <= 0) w = 100;
-                if (isNaN(h) || h <= 0) h = 100;
-
-                const geometry = new THREE.PlaneGeometry( w, h );
-                const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0 } ); // Invisible plane
+                const geometry = new THREE.PlaneGeometry( 100, 100 );
+                const material = new THREE.MeshBasicMaterial( { visible: false } );
                 this.planeArea = new THREE.Mesh( geometry, material );
-                this.planeArea.visible = false; // Just for raycasting
-                this.scene.add(this.planeArea); // Ensure it's in the scene
+                this.scene.add(this.planeArea);
                 this.createText();
             }
 
             bindEvents() {
-                // Attach listeners to container or window
-                window.addEventListener( 'mousedown', this.onMouseDown.bind( this ));
-                window.addEventListener( 'mousemove', this.onMouseMove.bind( this ));
-                window.addEventListener( 'mouseup', this.onMouseUp.bind( this ));
-                
-                // Touch support
-                window.addEventListener('touchstart', (e) => {
-                    this.onMouseDown(e.touches[0]); 
-                }, {passive: true}); // Passive true allows scrolling
-                window.addEventListener('touchmove', (e) => {
-                    // e.preventDefault(); // REMOVED: This was blocking scroll on mobile
-                    this.onMouseMove(e.touches[0]); 
-                }, {passive: true}); // Passive true allows scrolling
-                window.addEventListener('touchend', this.onMouseUp.bind(this));
+                document.addEventListener( 'mousedown', this.onMouseDown.bind( this ));
+                document.addEventListener( 'mousemove', this.onMouseMove.bind( this ));
+                document.addEventListener( 'mouseup', this.onMouseUp.bind( this ));
+                // Touch
+                document.addEventListener( 'touchstart', (e) => this.onMouseDown(e.touches[0]) );
+                document.addEventListener( 'touchmove', (e) => this.onMouseMove(e.touches[0]) );
+                document.addEventListener( 'touchend', this.onMouseUp.bind(this) );
             }
 
             onMouseDown(event){
-                // Allow event to be passed manually (for touch) or use global event
-                const e = event || window.event;
-                this.mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
-                this.mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
-
+                this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
                 this.buttom = true;
                 this.data.ease = .01;
             }
@@ -771,9 +579,8 @@
             }
 
             onMouseMove(event) { 
-                const e = event || window.event;
-                this.mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
-                this.mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+                this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
             }
 
             render( level ){ 
@@ -802,8 +609,8 @@
                         let py = pos.getY(i);
                         let pz = pos.getZ(i);
 
-                        // Default Color: White
-                        this.colorChange.setHSL( 0, 0, 1 ); 
+                        // Base Color: Black
+                        this.colorChange.setHex( 0x000000 ); 
                         coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
                         coulors.needsUpdate = true;
 
@@ -823,50 +630,27 @@
                             px -= f * Math.cos( t );
                             py -= f * Math.sin( t );
 
-                            // Click Color: Dynamic Red
-                            this.colorChange.setHSL( 0, 1.0 , .5 + zigzagTime )
+                            this.colorChange.setHex( 0xffffff ); // White on click (Inverted)
                             coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
                             coulors.needsUpdate = true;
-
-                            if ((px > (initX + 70)) || ( px < (initX - 70)) || (py > (initY + 70) || ( py < (initY - 70)))){
-                                this.colorChange.setHSL( 0, 1.0 , .3 )
-                                coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
-                                coulors.needsUpdate = true;
-                            }
-
-                        }else{
-                        
+                        } else {
                             if( mouseDistance < this.data.area ){
                                 if(i%5==0){
                                     const t = Math.atan2( dy, dx );
                                     px -= .03 * Math.cos( t );
                                     py -= .03 * Math.sin( t );
-
-                                    // Hover Color: Red accent
-                                    this.colorChange.setHSL( 0 , 1.0 , .5 )
+                                    this.colorChange.setHex( 0x330000 ); // Dark Red Hover
                                     coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
                                     coulors.needsUpdate = true;
-
                                     size.array[ i ]  =  this.data.particleSize /1.2;
                                     size.needsUpdate = true;
-                                }else{
+                                } else {
                                     const t = Math.atan2( dy, dx );
                                     px += f * Math.cos( t );
                                     py += f * Math.sin( t );
-
                                     pos.setXYZ( i, px, py, pz );
                                     pos.needsUpdate = true;
-
                                     size.array[ i ]  = this.data.particleSize * 1.3 ;
-                                    size.needsUpdate = true;
-                                }
-
-                                if ((px > (initX + 10)) || ( px < (initX - 10)) || (py > (initY + 10) || ( py < (initY - 10)))){
-                                    this.colorChange.setHSL( 0, 1.0 , .5 )
-                                    coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
-                                    coulors.needsUpdate = true;
-
-                                    size.array[ i ]  = this.data.particleSize /1.8;
                                     size.needsUpdate = true;
                                 }
                             }
@@ -887,14 +671,11 @@
                 let shapes = this.font.generateShapes( this.data.text , this.data.textSize  );
                 let geometry = new THREE.ShapeGeometry( shapes );
                 geometry.computeBoundingBox();
-            
                 const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-                const yMid =  - 0.5 * ( geometry.boundingBox.max.y - geometry.boundingBox.min.y ); // Centered for single line
-
+                const yMid =  - 0.5 * ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
                 geometry.center();
 
                 let holeShapes = [];
-
                 for ( let q = 0; q < shapes.length; q ++ ) {
                     let shape = shapes[ q ];
                     if ( shape.holes && shape.holes.length > 0 ) {
@@ -908,12 +689,10 @@
 
                 let colors = [];
                 let sizes = [];
-                            
                 for ( let  x = 0; x < shapes.length; x ++ ) {
                     let shape = shapes[ x ];
                     const amountPoints = ( shape.type == 'Path') ? this.data.amount/2 : this.data.amount;
                     let points = shape.getSpacedPoints( amountPoints ) ;
-
                     points.forEach( ( element, z ) => {
                         const a = new THREE.Vector3( element.x, element.y, 0 );
                         thePoints.push( a );
@@ -923,9 +702,7 @@
                 }
 
                 let geoParticles = new THREE.BufferGeometry().setFromPoints( thePoints );
-                // Adjusted yMid by adding 20 to move text upwards
-                geoParticles.translate( xMid, yMid + 20, 0 );
-                        
+                geoParticles.translate( xMid, yMid, 0 );
                 geoParticles.setAttribute( 'customColor', new THREE.Float32BufferAttribute( colors, 3 ) );
                 geoParticles.setAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1) );
 
@@ -936,29 +713,15 @@
                     },
                     vertexShader: document.getElementById( 'vertexshader' ).textContent,
                     fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-                    blending: THREE.AdditiveBlending,
+                    blending: THREE.NormalBlending, // Changed from Additive to Normal for black particles
                     depthTest: false,
                     transparent: true,
                 } );
 
                 this.particles = new THREE.Points( geoParticles, material );
                 this.scene.add( this.particles );
-
                 this.geometryCopy = new THREE.BufferGeometry();
                 this.geometryCopy.copy( this.particles.geometry );
-            }
-
-            visibleHeightAtZDepth ( depth, camera ) {
-                const cameraOffset = camera.position.z;
-                if ( depth < cameraOffset ) depth -= cameraOffset;
-                else depth += cameraOffset;
-                const vFOV = camera.fov * Math.PI / 180; 
-                return 2 * Math.tan( vFOV / 2 ) * Math.abs( depth );
-            }
-
-            visibleWidthAtZDepth( depth, camera ) {
-                const height = this.visibleHeightAtZDepth( depth, camera );
-                return height * camera.aspect;
             }
 
             distance (x1, y1, x2, y2){
@@ -967,118 +730,30 @@
         }
 
         // --- GSAP ANIMATIONS ---
-        // (Keep existing GSAP logic below)
-        gsap.registerPlugin(ScrollTrigger, TextPlugin);
+        gsap.registerPlugin(ScrollTrigger);
 
-        // Menu Toggle Logic
-        const menuToggleBtn = document.getElementById('menuToggleBtn');
-        const closeMenuBtn = document.getElementById('closeMenuBtn');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        function openMenu() {
-            menuOverlay.classList.add('active');
-        }
-
-        function closeMenu() {
-            menuOverlay.classList.remove('active');
-        }
-
-        menuToggleBtn.addEventListener('click', openMenu);
-        closeMenuBtn.addEventListener('click', closeMenu);
-
-        navLinks.forEach(link => {
-            link.addEventListener('click', closeMenu);
-        });
-
-        // 1. HERO REVEAL (Modified: Only fades in paragraph/CTA, title is Three.js)
-        const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
-        // Removed H1 animation as it is handled by Three.js canvas now
-        heroTl.from("#welcome p", { opacity: 0, duration: 1, y: 50, delay: 1 }) // Added delay to let particles load
-              .from(".hero-cta", { opacity: 0, duration: 1, y: 30 }, "-=0.8");
-
-        // 2. VIDEO FADE
-        gsap.from("#video iframe", {
-            scrollTrigger: { 
-                trigger: "#video", 
-                start: "top 80%", 
-                end: "center center",
-                scrub: 1
-            },
-            opacity: 0.3, scale: 0.95
-        });
-
-        // 3. STORY GRID REVEAL
-        gsap.utils.toArray(".story-card").forEach((card, i) => {
-            gsap.from(card, {
-                scrollTrigger: { 
-                    trigger: card, 
-                    start: "top 90%"
-                },
-                y: 50, opacity: 0, duration: 0.8, delay: i * 0.1
+        // Feature Reveal
+        gsap.utils.toArray('.feature-block').forEach(block => {
+            gsap.from(block, {
+                scrollTrigger: { trigger: block, start: "top 80%" },
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out"
             });
         });
 
-        // 4. TRAP SECTION
-        gsap.utils.toArray(".trap-card").forEach((card) => {
-            gsap.from(card, {
-                scrollTrigger: { 
-                    trigger: card, 
-                    start: "top 85%"
-                },
-                x: -50, opacity: 0, duration: 1
-            });
+        // Gamification Score
+        let score = 0;
+        const scoreEl = document.getElementById('score');
+        window.addEventListener('scroll', () => {
+            if(Math.random() > 0.8 && scoreEl) {
+                score += 1;
+                if(score > 100) score = 0;
+                scoreEl.innerText = score;
+            }
         });
 
-        // 5. FLOATING BUTTONS
-        const floatBtns = gsap.utils.toArray(".float-btn");
-        gsap.from(floatBtns, {
-            scrollTrigger: {
-                trigger: ".floating-buttons-container",
-                start: "top 90%"
-            },
-            scale: 0, opacity: 0, stagger: 0.1, duration: 0.6, ease: "back.out(1.7)"
-        });
-
-        // TYPEWRITER
-        gsap.to(".gs-typewriter", {
-            scrollTrigger: { 
-                trigger: ".gs-typewriter", 
-                start: "top 80%"
-            },
-            text: { value: "Make humans think again. Reshape the world. Evolution is in our hands.", delimiter: "" },
-            duration: 4, ease: "none",
-            onStart: () => { document.querySelector('.gs-typewriter').style.color = "var(--text-main)"; }
-        });
-
-        // 6. DEVICES REVEAL (PRESERVED LOGIC)
-        gsap.utils.toArray('.feature-row').forEach(row => {
-            gsap.from(row.querySelector('.phone-frame'), {
-                scrollTrigger: { 
-                    trigger: row, 
-                    start: "top 85%"
-                },
-                y: 100, opacity: 0, duration: 1, ease: "power3.out"
-            });
-            gsap.from(row.querySelector('.feature-text'), {
-                scrollTrigger: { 
-                    trigger: row, 
-                    start: "top 85%"
-                },
-                x: 50, opacity: 0, duration: 1, delay: 0.2, ease: "power3.out"
-            });
-        });
-
-        // Final CTA
-        gsap.from("#beforeyougo p", { 
-            scrollTrigger: { trigger: "#beforeyougo", start: "top 70%" }, 
-            y: 50, opacity: 0, duration: 1 
-        });
-        gsap.from(".big-download-btn", { 
-            scrollTrigger: { trigger: "#beforeyougo", start: "top 70%" }, 
-            scale: 0.9, opacity: 0, duration: 1, delay: 0.2 
-        });
     </script>
 </body>
 </html>
-
